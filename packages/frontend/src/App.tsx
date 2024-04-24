@@ -6,13 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { AppContext, AppContextType } from "./lib/contextLib";
 import { Auth } from "aws-amplify";
 import Routes from "./Routes.tsx";
+import { onError } from "./lib/errorLib";
 import "./App.css";
-
-const nav = useNavigate();
 
 function App() {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isAuthenticated, userHasAuthenticated] = useState(false);
+
+  const nav = useNavigate();
 
   useEffect(() => {
     onLoad();
@@ -22,9 +23,9 @@ function App() {
     try {
       await Auth.currentSession();
       userHasAuthenticated(true);
-    } catch (e) {
-      if (e !== "No current user") {
-        alert(e);
+    } catch (error) {
+      if (error !== "No current user") {
+        onError(error);
       }
     }
 
@@ -45,7 +46,7 @@ function App() {
       <div className="App container py-3">
         <Navbar collapseOnSelect bg="light" expand="md" className="mb-3 px-3">
           <LinkContainer to="/">
-            <Navbar.Brand className="fw-bold text-muted">Scratch</Navbar.Brand>
+            <Navbar.Brand className="fw-bold text-muted">HAP</Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
