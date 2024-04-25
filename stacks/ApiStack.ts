@@ -2,7 +2,7 @@ import { Api, StackContext, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
 
 export function ApiStack({ stack }: StackContext) {
-  const { table } = use(StorageStack);
+  const { clientTable, patientTable } = use(StorageStack);
 
   // Create the API
   const api = new Api(stack, "Api", {
@@ -11,15 +11,15 @@ export function ApiStack({ stack }: StackContext) {
     defaults: {
       authorizer: "iam",
       function: {
-        bind: [table],
+        bind: [clientTable, patientTable],
       },
     },
     routes: {
-      "POST /clients": "packages/functions/src/clients/create.main",
-      "GET /clients/{id}": "packages/functions/src/clients/get.main",
-      "GET /clients": "packages/functions/src/clients/list.main",
-      "PUT /clients/{id}": "packages/functions/src/clients/update.main",
-      "DELETE /clients/{id}": "packages/functions/src/clients/delete.main",
+      "POST /patients": "packages/functions/src/patients/create.main",
+      "GET /patients/{id}": "packages/functions/src/patients/get.main",
+      "GET /patients": "packages/functions/src/patients/list.main",
+      "PUT /patients/{id}": "packages/functions/src/patients/update.main",
+      "DELETE /patients/{id}": "packages/functions/src/patients/delete.main",
     },
   });
 
