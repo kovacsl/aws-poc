@@ -1,69 +1,87 @@
-import Pagination from 'react-bootstrap/Pagination';
+import { usePagination, DOTS } from "../lib/usePagination";
+import classnames from "classnames";
+
+import "./Pagination.css";
 
 interface Props {
   totalCount: number;
-  limit: number;
-  page: number;
-  handleClick: (page: number) => {};
+  pageSize: number;
+  currentPage: number;
+  onPageChange: (page: number) => {};
+  siblingCount?: number;
+  className: string;
 }
 
-export default function PaginationComponent(props: Props) {
-  const { totalCount, limit, page, handleClick } = props;
+export default function Pagination(props: Props) {
+  const { totalCount, currentPage, siblingCount, pageSize, className, onPageChange } = props;
 
-  const totalPages = Math.ceil(totalCount / limit);
+  const paginationRange = usePagination({
+    currentPage,
+    totalCount,
+    siblingCount,
+    pageSize
+  }) ?? [];
 
-  let items = [];
-  if (totalPages > 10) {
-    items.push(
-      <Pagination.First key="first" onClick={() => handleClick(1)}/>
-    );
-    items.push(
-      <Pagination.Prev key="prev" onClick={() => handleClick(page - 1)}/>
-    );
-    items.push(
-      <Pagination.Item key={1} active={1 === page} onClick={() => handleClick(1)}>
-        {1}
-      </Pagination.Item>,
-    );
-    items.push(
-      <Pagination.Ellipsis key="ellipsis_1" />
-    );
-    const middle = totalPages / 2;
-    for (let n = middle; n <= middle + 5; n++) {
-      items.push(
-        <Pagination.Item key={n} active={n === page} onClick={() => handleClick(n)}>
-          {n}
-        </Pagination.Item>,
-      );
-    }
-    items.push(
-      <Pagination.Ellipsis key="ellipsis_2"/>
-    );
-    items.push(
-      <Pagination.Item key={totalPages} active={totalPages === page} onClick={() => handleClick(totalPages)}>
-        {totalPages}
-      </Pagination.Item>,
-    );
-    items.push(
-      <Pagination.Next key="next" onClick={() => handleClick(page + 1)} />
-    );
-    items.push(
-      <Pagination.Last key="last" onClick={() => handleClick(totalPages)} />
-    );
-  }
-  else {
-    for (let n = 1; n <= totalPages; n++) {
-      items.push(
-        <Pagination.Item key={n} active={n === page} onClick={() => handleClick(n)}>
-          {n}
-        </Pagination.Item>,
-      );
-    }
+  // If there are less than 2 times in pagination range we shall not render the component
+  if (currentPage === 0 || paginationRange.length < 2) {
+    return null;
   }
 
+  const onNext = () => {
+    onPageChange(currentPage + 1);
+  };
+
+  const onPrevious = () => {
+    onPageChange(currentPage - 1);
+  };
+
+  let lastPage = paginationRange[paginationRange.length - 1];
   return (
-    <Pagination {...props}>
-      {items}
-    </Pagination>
+
+    <ul
+      className={classnames('pagination-container', { [className]: className })}
+    >
+      {/* Left navigation arrow */}
+      <li
+        key={"prev"}
+        className={classnames('pagination-item', {
+          disabled: currentPage === 1
+        })}
+        onClick={onPrevious}
+      >
+        <div className="arrow left" />
+      </li>
+      {paginationRange.map((pageNumber, index) => {
+
+        // If the pageItem is a DOT, render the DOTS unicode character
+        if (pageNumber === DOTS) {
+          return <li key={index} className="pagination-item dots">&#8230;</li>;
+        }
+
+        // Render our Page Pills
+        return (
+          <li
+            key={index}
+            className={classnames('pagination-item', {
+              selected: pageNumber === currentPage
+            })}
+            onClick={() => onPageChange(parseInt(`${pageNumber}`, 10))}
+          >
+            {pageNumber}
+          </li>
+        );
+      })}
+      {/*  Right Navigation arrow */}
+      <li
+        key={"next"}
+        className={classnames('pagination-item', {
+          disabled: currentPage === lastPage
+        })}
+        onClick={onNext}
+      >
+        <div className="arrow right" />
+      </li>
+    </ul>
   )
+
 }
