@@ -1,4 +1,3 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import { BrowserRouter as Router } from "react-router-dom";
@@ -19,12 +18,12 @@ Amplify.configure({
   API: {
     endpoints: [
       {
-        name: "clients",
+        name: "oauth",
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION,
       },
       {
-        name: "patients",
+        name: "clients",
         endpoint: config.apiGateway.URL,
         region: config.apiGateway.REGION,
       },
@@ -33,9 +32,7 @@ Amplify.configure({
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
     <Router>
       <App />
-    </Router>
-  </React.StrictMode>,
+    </Router>,
 )

@@ -2,12 +2,12 @@ import { useState } from "react";
 import Form from "react-bootstrap/Form";
 import Stack from "react-bootstrap/Stack";
 import { useNavigate } from "react-router-dom";
-import LoaderButton from "../components/LoaderButton";
+import LoaderButton from "../../components/LoaderButton";
 import "./NewPatient.css";
+import config from "../../config.ts";
 
-import { API } from "aws-amplify";
-import { onError } from "../lib/errorLib";
-import { PatientType, GenderNames } from "../types/PatientType";
+import { onError } from "../../lib/errorLib";
+import { PatientType, GenderNames } from "../../types/PatientType";
 
 import { useFormik } from 'formik';
 import * as yup from 'yup';
@@ -38,8 +38,15 @@ export default function NewPatient() {
     });
 
     function createPatient(patient: PatientType) {
-        return API.post("patients", "/patients", {
-            body: patient,
+        const token = sessionStorage.getItem('access_token');
+
+        return fetch(`${config.apiGateway.URL}/patients`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(patient),
         });
     }
 
@@ -48,7 +55,7 @@ export default function NewPatient() {
 
         try {
             await createPatient(values);
-            nav("/");
+            nav(-1);
         } catch (e) {
             onError(e);
             setIsLoading(false);
@@ -69,7 +76,7 @@ export default function NewPatient() {
         }
 
         try {
-            nav("/");
+            nav(-1);
         } catch (e) {
             onError(e);
         }
@@ -144,8 +151,8 @@ export default function NewPatient() {
                     >
                         <option>Open this select menu</option>
                         <option value={GenderNames.Male}>Male</option>
-                        <option value={GenderNames.Male}>Female</option>
-                        <option value={GenderNames.Male}>Other</option>
+                        <option value={GenderNames.Female}>Female</option>
+                        <option value={GenderNames.Other}>Other</option>
                     </Form.Select>
                     <Form.Control.Feedback type="invalid">
                         {formik.errors.gender}

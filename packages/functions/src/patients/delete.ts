@@ -1,18 +1,11 @@
-import { Table } from "sst/node/table";
 import handler from "@patients/core/handler";
-import dynamoDb from "@patients/core/dynamodb";
+import database from "@patients/core/database";
 
 export const main = handler(async (event) => {
-  
-  const params = {
-    TableName: Table.Patients.tableName,
-    Key: {
-      // The attributes of the item to be created
-      patientId: event?.pathParameters?.id, // The id of the client
-    },
-  };
+  const result = await database.delete(
+    event.requestContext?.authorizer?.lambda?.databaseProvider, 
+    event.requestContext?.authorizer?.lambda?.databaseUrl, 
+    event?.pathParameters?.id);
 
-  await dynamoDb.delete(params);
-
-  return JSON.stringify({ status: true });
+  return JSON.stringify({ status: result });
 });

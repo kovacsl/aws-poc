@@ -1,24 +1,14 @@
-import { Table } from "sst/node/table";
 import handler from "@patients/core/handler";
-import dynamoDb from "@patients/core/dynamodb";
+import database from "@patients/core/database";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
 
 export const main = handler(async (event: APIGatewayProxyEvent) => {
-  const params = {
-    TableName: Table.Patients.tableName,
-    // 'Key' defines the partition key and sort key of
-    // the item to be retrieved
-    Key: {
-      patientId: event?.pathParameters?.id, // The id of the client
-    },
-  };
+  const result = await database.get(
+    event.requestContext?.authorizer?.lambda?.databaseProvider, 
+    event.requestContext?.authorizer?.lambda?.databaseUrl, 
+    event?.pathParameters?.id);
 
-  const result = await dynamoDb.get(params);
-  if (!result.Item) {
-    throw new Error("Item not found.");
-  }
-
-  // Return the retrieved item
-  return JSON.stringify(result.Item);
+  // Return the matching list of items in response body
+  return JSON.stringify(result);
 });

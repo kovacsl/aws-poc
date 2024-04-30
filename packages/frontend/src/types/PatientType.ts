@@ -7,6 +7,7 @@ export interface PatientType {
     birthDate?: string;
     createdAt?: string;
     modifiedAt?: string;
+    totalCount?: number;
 }
 
 export enum GenderNames {

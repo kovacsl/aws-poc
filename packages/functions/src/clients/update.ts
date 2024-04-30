@@ -13,10 +13,12 @@ export const main = handler(async (event) => {
   },
     // 'UpdateExpression' defines the attributes to be updated
     // 'ExpressionAttributeValues' defines the value in the update expression
-    UpdateExpression: "SET clientName = :clientName, databaseUrl = :databaseUrl, modifiedAt = :modifiedAt",
+    UpdateExpression: "SET clientName = :clientName, scopes = :scopes, databaseUrl = :databaseUrl, databaseProvider = :databaseProvider, modifiedAt = :modifiedAt",
     ExpressionAttributeValues: {
       ":clientName": data.clientName || null,
       ":databaseUrl": data.databaseUrl || null,
+      ":scopes": data.scopes || null,
+      ":databaseProvider": data.databaseProvider || null,
       ":modifiedAt": Date.now(), 
     },
     // 'ReturnValues' specifies if and how to return the item's attributes,

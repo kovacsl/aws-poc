@@ -2,19 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import Stack from "react-bootstrap/Stack";
-import LoaderButton from "../components/LoaderButton";
-import { API } from "aws-amplify";
-import { onError } from "../lib/errorLib";
-import { PatientType, GenderNames } from "../types/PatientType";
+import LoaderButton from "../../components/LoaderButton";
+import Spinner from 'react-bootstrap/Spinner';
+import { onError } from "../../lib/errorLib";
+import { PatientType, GenderNames } from "../../types/PatientType";
 import "./Patient.css";
+import config from "../../config.ts";
 
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import dayjs from 'dayjs';
 
-export default function Notes() {
+export default function Patient() {
 
-    const { id } = useParams();
+    const { patientId } = useParams();
     const nav = useNavigate();
     const [patient, setPatient] = useState(null);
 
@@ -42,8 +43,18 @@ export default function Notes() {
         }
     });
 
-    function loadPatient() {
-        return API.get("patients", `/patients/${id}`, {});
+    async function loadPatient() {
+        const token = sessionStorage.getItem('access_token');
+
+        const response = await fetch(`${config.apiGateway.URL}/patients/${patientId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+
+        return response.json();
     }
 
     useEffect(() => {
@@ -51,11 +62,11 @@ export default function Notes() {
             try {
                 const patient = await loadPatient();
 
-                formik.setFieldValue('firstName', patient.firstName);
-                formik.setFieldValue('lastName', patient.lastName);
-                formik.setFieldValue('email', patient.email);
-                formik.setFieldValue('birthDate', dayjs(patient.birthDate).format("YYYY-MM-DD"));
-                formik.setFieldValue('gender', patient.gender as GenderNames);
+                formik.setFieldValue('firstName', patient?.firstName);
+                formik.setFieldValue('lastName', patient?.lastName);
+                formik.setFieldValue('email', patient?.email);
+                formik.setFieldValue('birthDate', dayjs(patient?.birthDate).format("YYYY-MM-DD"));
+                formik.setFieldValue('gender', patient?.gender as GenderNames);
 
                 setPatient(patient);
             } catch (e) {
@@ -64,11 +75,18 @@ export default function Notes() {
         }
 
         onLoad();
-    }, [id]);
+    }, [patientId]);
 
     function savePatient(patient: PatientType) {
-        return API.put("patients", `/patients/${id}`, {
-            body: patient,
+        const token = sessionStorage.getItem('access_token');
+
+        return fetch(`${config.apiGateway.URL}/patients/${patientId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+            body: JSON.stringify(patient),
         });
     }
 
@@ -77,7 +95,7 @@ export default function Notes() {
 
         try {
             await savePatient(values);
-            nav("/");
+            nav(-1);
         } catch (e) {
             onError(e);
             setIsLoading(false);
@@ -85,7 +103,14 @@ export default function Notes() {
     }
 
     function deletePatient() {
-        return API.del("patients", `/patients/${id}`, {});
+        const token = sessionStorage.getItem('access_token');
+        return fetch(`${config.apiGateway.URL}/patients/${patientId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
     }
 
     async function handleDelete(event: React.FormEvent<HTMLFormElement>) {
@@ -103,7 +128,7 @@ export default function Notes() {
 
         try {
             await deletePatient();
-            nav("/");
+            nav(-1);
         } catch (e) {
             onError(e);
             setIsDeleting(false);
@@ -124,7 +149,7 @@ export default function Notes() {
         }
 
         try {
-            nav("/");
+            nav(-1);
         } catch (e) {
             onError(e);
         }
@@ -134,6 +159,9 @@ export default function Notes() {
     return (
         <div className="Patient">
             <h2 className="pb-3 mt-4 mb-3 border-bottom">Edit a patient</h2>
+            {(!patient && <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+            </Spinner>)}
             {(patient &&
                 <Form noValidate onSubmit={formik.handleSubmit}>
                     <Form.Group controlId="firstName">
@@ -201,8 +229,8 @@ export default function Notes() {
                         >
                             <option>Open this select menu</option>
                             <option value={GenderNames.Male}>Male</option>
-                            <option value={GenderNames.Male}>Female</option>
-                            <option value={GenderNames.Male}>Other</option>
+                            <option value={GenderNames.Female}>Female</option>
+                            <option value={GenderNames.Other}>Other</option>
                         </Form.Select>
                         <Form.Control.Feedback type="invalid">
                             {formik.errors.gender}

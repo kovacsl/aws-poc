@@ -1,14 +1,14 @@
-import AWS from "aws-sdk";
 import { v4 as uuidv4 } from 'uuid';
 import handler from "@patients/core/handler";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { Table } from "sst/node/table";
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+import dynamoDb from "@patients/core/dynamodb";
 
 export const main = handler(async (event: APIGatewayProxyEvent) => {
   let data = {
     clientName: "",
+    scopes: "",
+    databaseProvider: "",
     databaseUrl: "",
   };
 
@@ -23,6 +23,8 @@ export const main = handler(async (event: APIGatewayProxyEvent) => {
       clientId: btoa(uuidv4()), // The id of the author
       clientSecret: uuidv4(), // A unique uuid
       clientName: data.clientName,
+      scopes: data.scopes,
+      databaseProvider: data.databaseProvider,
       databaseUrl: data.databaseUrl,
       createdAt: Date.now(), // Current Unix timestamp
       modifiedAt: Date.now(), // Current Unix timestamp

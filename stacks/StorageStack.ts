@@ -5,9 +5,8 @@ export function StorageStack({ stack }: StackContext) {
   const clientTable = new Table(stack, "Clients", {
     fields: {
       clientId: "string",
-      clientSecret: "string",
     },
-    primaryIndex: { partitionKey: "clientId", sortKey: "clientSecret" },
+    primaryIndex: { partitionKey: "clientId" },
   });
 
   const patientTable = new Table(stack, "Patients", {

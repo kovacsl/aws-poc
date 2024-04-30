@@ -1,14 +1,10 @@
 @media all and (min-width: 480px) {
-    .Patient {
-        padding: 60px 0;
-    }
-
-    .Patient form {
+    .Client form {
         margin: 0 auto;
         max-width: 40rem;
     }
 
-    .Patient form>div {
+    .Client form>div {
         margin-bottom: 2rem;
     }
 }
