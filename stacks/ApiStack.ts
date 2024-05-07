@@ -39,6 +39,7 @@ export function ApiStack({ stack }: StackContext) {
       "GET /clients/{id}": "packages/functions/src/clients/get.main",
       "GET /clients": "packages/functions/src/clients/list.main",
       "PUT /clients/{id}": "packages/functions/src/clients/update.main",
+      "PUT /clients/{id}/lua": "packages/functions/src/clients/lua.main",
       "DELETE /clients/{id}": "packages/functions/src/clients/delete.main",
     },
   });
@@ -63,6 +64,10 @@ export function ApiStack({ stack }: StackContext) {
     "DELETE /patients/{id}": {
       authorizer: "lambdaAuthorizer",
       function: "packages/functions/src/patients/delete.main"
+    },
+    "POST /channel/{id}": {
+      authorizer: "lambdaAuthorizer",
+      function: "packages/functions/src/lua/execute.main",
     },
   })
   // Show the API endpoint in the output

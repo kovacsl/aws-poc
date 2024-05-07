@@ -5,7 +5,7 @@ import { AuthStack } from "./AuthStack";
 export function FrontendStack({ stack, app }: StackContext) {
   const { api } = use(ApiStack);
   const { auth } = use(AuthStack);
-
+  
   // Define our React app
   const site = new StaticSite(stack, "ReactSite", {
     path: "packages/frontend",
@@ -20,6 +20,7 @@ export function FrontendStack({ stack, app }: StackContext) {
       VITE_IDENTITY_POOL_ID: auth.cognitoIdentityPoolId || "",
     },
   });
+
 
   // Show the url in the output
   stack.addOutputs({

@@ -5,7 +5,9 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@patients/core/*": ["../core/src/*"]
+      "@patients/core/*": [
+        "../core/src/*"
+      ]
     }
-  }
+  },
 }

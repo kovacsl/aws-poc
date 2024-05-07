@@ -2,17 +2,6 @@ import handler from "@patients/core/handler";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import database from "@patients/core/database";
 
-export interface ClientType {
-  clientId?: string;
-  clientSecret?: string;
-  clientName?: string;
-  scopes?: string;
-  databaseProvider?: string;
-  databaseUrl?: string;
-  createdAt?: string;
-  modifiedAt?: string;
-}
-
 export const main = handler(async (event: APIGatewayProxyEvent) => {
   let data = {
     firstName: "",

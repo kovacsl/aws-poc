@@ -8,4 +8,5 @@ export interface ClientType {
     luaScript?: string;
     createdAt?: string;
     modifiedAt?: string;
-}
+  }
+  

@@ -10,6 +10,7 @@ export const main = handler(async (event: APIGatewayProxyEvent) => {
     scopes: "",
     databaseProvider: "",
     databaseUrl: "",
+    luaScript: "",
   };
 
   if (event.body) {
@@ -26,6 +27,7 @@ export const main = handler(async (event: APIGatewayProxyEvent) => {
       scopes: data.scopes,
       databaseProvider: data.databaseProvider,
       databaseUrl: data.databaseUrl,
+      luaScript: data.luaScript,
       createdAt: Date.now(), // Current Unix timestamp
       modifiedAt: Date.now(), // Current Unix timestamp
     },

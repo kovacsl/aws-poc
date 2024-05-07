@@ -1,3 +1,5 @@
+console.debug(import.meta);
+
 const config = {
   // Backend config
   apiGateway: {

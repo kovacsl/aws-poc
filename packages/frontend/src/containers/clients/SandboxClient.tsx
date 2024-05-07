@@ -6,8 +6,11 @@ import Spinner from 'react-bootstrap/Spinner';
 import { ClientType } from "../../types/ClientType.ts";
 import Button from 'react-bootstrap/Button';
 import LoaderButton from "../../components/LoaderButton.tsx";
+import Accordion from 'react-bootstrap/Accordion';
 
 import "./SandboxClient.css";
+import CodeEditor from "../../components/CodeEditor.tsx";
+import config from "../../config.ts";
 
 export default function SandboxClient() {
 
@@ -19,6 +22,10 @@ export default function SandboxClient() {
 
     const [isConnected, setIsConnected] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLuaExecuting, setIsLuaExecuting] = useState(false);
+    const [luaResult, setLuaResult] = useState<string | null>(null);
+
+    const [luaScript, setLuaScript] = useState("");
 
     const [token, setToken] = useState(null);
 
@@ -47,6 +54,8 @@ export default function SandboxClient() {
             const client = await loadClient();
 
             setClient(client);
+
+            setLuaScript(client?.luaScript ?? "print(\"Your script.\")");
 
             const { access_token } = await getToken(client);
 
@@ -97,6 +106,49 @@ export default function SandboxClient() {
         }
     }
 
+    async function saveLuaScript(luaScript: string) {
+        return API.put("clients", `/clients/${id}/lua`, {
+            body: { luaScript: luaScript },
+        });
+    }
+
+    function handleLuaChange(newValue: string) {
+        setLuaScript(newValue);
+    }
+
+    function executeLuaScript(id: string) {
+        const token = sessionStorage.getItem('access_token');
+
+        return fetch(`${config.apiGateway.URL}/channel/${id}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+    }
+
+    async function handleLua(event: React.MouseEvent<HTMLElement>) {
+        event.preventDefault();
+
+        setLuaResult(null);
+
+        setIsLuaExecuting(true);
+
+        try {
+            await saveLuaScript(luaScript);
+            const response = await executeLuaScript(client?.clientId ?? "");
+
+            const result = await response.json();
+
+            setLuaResult(JSON.stringify(result, null, 2));
+        } catch (e) {
+            onError(e);
+        }
+
+        setIsLuaExecuting(false);
+    }
+
     return (
         <div className="Sandbox">
             <h2 className="pb-3 mt-4 mb-3 border-bottom">Client sandbox</h2>
@@ -122,6 +174,16 @@ export default function SandboxClient() {
                     </div>
                     {(isConnected && <pre className="text-secondary p-3 mb-3 border token">{token}</pre>)}
                     {(isConnected && <Button variant="danger" onClick={handleDisconnect}>Disconnect & Exit</Button>)}
+                    {(isConnected && <Accordion className="mt-2">
+                        <Accordion.Item eventKey="0">
+                            <Accordion.Header>Execute Lua script</Accordion.Header>
+                            <Accordion.Body>
+                                <CodeEditor code={luaScript} onChange={handleLuaChange} />
+                                <LoaderButton size="md" variant="primary" onClick={handleLua} isLoading={isLuaExecuting}>Save & Execute</LoaderButton>
+                                {(luaResult && <pre className="text-secondary p-3 mt-3 mb-3 border">{luaResult}</pre>)}
+                            </Accordion.Body>
+                        </Accordion.Item>
+                    </Accordion>)}
                     {(!isConnected && <LoaderButton
                         size="lg"
                         variant="primary"
